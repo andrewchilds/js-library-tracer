@@ -11,7 +11,8 @@ var Tracer = (function () {
 
     var starting_time = new Date().getTime();
     var is_running = false;
-    var functions = {};
+    var functions = [];
+    var index = 0;
     var indent = 0;
 
     var pad = function () {
@@ -28,13 +29,13 @@ var Tracer = (function () {
         return '+' + ms + 'ms';
     };
 
-    var wrapper = function (name) {
+    var wrapper = function (name, index) {
         return function () {
             if (is_running) {
                 window.console.log('[Tracer][' + elapsed() + '] ' + pad() + name, arguments);
             }
             indent++;
-            var result = functions[name].apply(this, arguments);
+            var result = functions[index].apply(this, arguments);
             indent--;
             return result;
         };
@@ -48,8 +49,9 @@ var Tracer = (function () {
                 watch(library[prop]);
             }
             if (Object.prototype.toString.call(library[prop]) === '[object Function]') {
-                functions[prop] = library[prop];
-                library[prop] = wrapper(prop);
+                functions[index] = library[prop];
+                library[prop] = wrapper(prop, index);
+                index++;
             }
         }
     };
